@@ -2,27 +2,37 @@ package com.example.orientationapp
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.animation.LinearInterpolator
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
+import com.example.orientationapp.database.ListDatabase
+import com.example.orientationapp.database.ListEntity
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
+    lateinit var btnPrevious : Button
     lateinit var mainImage: ImageView
     var animationDuration :  Long = 1000
     private lateinit var sensorManager: SensorManager
-    lateinit var txtRoll : TextView
+
     var x : String = ""
     var y : String = ""
-    var prev : String = ""
+    var dbList = listOf<ListEntity>()
+
+
 
 
 
@@ -31,10 +41,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        txtRoll = findViewById(R.id.txtRoll)
+        btnPrevious = findViewById(R.id.btnPrevious)
+
         mainImage = findViewById(R.id.mainImage)
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         var list = sensorManager.getSensorList(Sensor.TYPE_ORIENTATION)
+
 //        if (sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION) != null) {
 //            Toast.makeText(this@MainActivity,"sensor is available",Toast.LENGTH_LONG).show()
 //        } else {
@@ -43,6 +55,7 @@ class MainActivity : AppCompatActivity() {
 //        }
 
         var se = object : SensorEventListener{
+
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
 
             }
@@ -58,10 +71,34 @@ class MainActivity : AppCompatActivity() {
                     Log.d("debug", "mRoll :$mRoll")
                     y = mPitch.toString()
                     x = mRoll.toString()
+
+
                     animateLogo(x,y)
+                    val uniqueID = UUID.randomUUID().toString()
+
+                    val listEntity = ListEntity(
+                       uniqueID,
+                        mRoll.toString(),
+                        mPitch.toString()
+
+                    )
+                    dbList = ListHolder.RetrieveFavourites(
+                        this@MainActivity
+                    ).execute().get()
+                    if(dbList.size < 500){
+                        DBAsyncTask(this@MainActivity,listEntity,uniqueID,2).execute()
+//                        count += 1;
+                    }
 
 
-                    txtRoll.text = x
+
+
+
+
+
+
+
+
                 }
             }
 
@@ -72,6 +109,10 @@ class MainActivity : AppCompatActivity() {
 
         }
         sensorManager.registerListener(se,list.get(0),SensorManager.SENSOR_DELAY_NORMAL)
+        btnPrevious.setOnClickListener {
+            val intent = Intent(this@MainActivity , ListHolder::class.java)
+            startActivity(intent)
+        }
 
 
 
@@ -114,6 +155,74 @@ class MainActivity : AppCompatActivity() {
         valueAnimatorX.start()
         valueAnimatorY.start()
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    class DBAsyncTask(val context: Context, val listEntity: ListEntity,val listId : String, val mode : Int) : AsyncTask<Void, Void, Boolean>(){
+
+        /*mode 1 = check db if book is fav or not
+         mode 2 = add to fav
+         mode 3 = remove from fav*/
+
+        val db = Room.databaseBuilder(context , ListDatabase::class.java, "lists-db").build()
+        override fun doInBackground(vararg p0: Void?): Boolean {
+            when(mode){
+                1 ->{
+
+                    val list : ListEntity? =db.listDao().getListById(listEntity.listId)
+                    db.close()
+                    return list!= null        //will return false if no book is present
+
+                }
+
+                2->{
+                    db.listDao().insertList(listEntity)
+                    db.close()
+                    return true
+
+                }
+                3->{
+                    db.listDao().deleteListById(listId)
+                    db.close()
+                    return true
+
+                }
+                4 -> {
+                    db.listDao().getAllLists()
+                    db.close()
+                    return true
+                }
+
+
+
+            }
+            return false
+        }
+
+    }
+    class RetrieveFavourites(val context: Context) : AsyncTask<Void, Void, List<ListEntity>>() {
+        val db = Room.databaseBuilder(context , ListDatabase::class.java, "lists-db").build()
+        override fun doInBackground(vararg params: Void?): List<ListEntity> {
+            return db.listDao().getAllLists()
+
+        }
+    }
+
+
 
 
 

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ListHolder">
+
+    <!-- TODO: Update blank fragment layout -->
+   <RelativeLayout
+       android:layout_width="match_parent"
+       android:layout_height="100dp">
+       <TextView
+           android:id="@+id/txtPrev"
+           android:layout_centerHorizontal="true"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:textColor="#000"
+           android:textSize="25dp"
+           android:text="Previous Orientations"/>
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="70dp"
+           android:layout_marginTop="20dp"
+           android:weightSum="8"
+           android:orientation="horizontal"
+           android:layout_below="@id/txtPrev">
+
+           <TextView
+               android:textColor="#000"
+               android:textSize="15sp"
+               android:id="@+id/txtMax"
+               android:textAlignment="viewStart"
+               android:text="Maximum"
+               android:layout_width="0dp"
+               android:layout_height="match_parent"
+               android:layout_weight="4"/>
+           <TextView
+               android:textColor="#000"
+
+               android:textAlignment="viewStart"
+               android:textSize="15sp"
+               android:id="@+id/txtMin"
+               android:text="Manimum"
+               android:layout_width="0dp"
+               android:layout_height="match_parent"
+               android:layout_weight="4"/>
+
+       </LinearLayout>
+
+   </RelativeLayout>
+
+
+
+
+
+    <ListView
+        android:layout_marginTop="105dp"
+        android:id="@+id/previousList"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+
+
+    <RelativeLayout
+
+        android:id="@+id/progressLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#fff">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>
